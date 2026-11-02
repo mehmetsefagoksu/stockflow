@@ -26,6 +26,7 @@ public class ProductService {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found " + id));
     }
+
     public Product createProduct(ProductCreateRequest request) {
         Product product = new Product(
                 request.name(),
