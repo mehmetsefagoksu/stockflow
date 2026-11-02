@@ -6,6 +6,8 @@ import com.stockflow.model.Product;
 import com.stockflow.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
+import com.stockflow.dto.ProductUpdateRequest;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -35,5 +37,34 @@ public class ProductService {
                 request.categoryId()
         );
         return productRepository.save(product);
+    }
+
+    @Transactional
+    public Product updateProduct(Integer id, ProductUpdateRequest request) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ProductNotFoundException("Product not found " + id)
+                );
+
+        product.updateDetails(
+                request.name(),
+                request.price(),
+                request.stockQuantity(),
+                request.categoryId()
+        );
+
+        return product;
+    }
+
+    @Transactional
+    public void deleteProduct(Integer id) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ProductNotFoundException("Product not found " + id)
+                );
+
+        productRepository.delete(product);
     }
 }

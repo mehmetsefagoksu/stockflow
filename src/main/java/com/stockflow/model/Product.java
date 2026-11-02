@@ -57,4 +57,16 @@ public class Product {
     public Integer getCategoryId() {
         return categoryId;
     }
+
+    public void updateDetails(
+            String name,
+            BigDecimal price,
+            int stockQuantity,
+            Integer categoryId
+    ) {
+        this.name = name;
+        this.price = price;
+        this.stockQuantity = stockQuantity;
+        this.categoryId = categoryId;
+    }
 }
