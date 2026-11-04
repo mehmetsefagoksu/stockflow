@@ -1,26 +1,26 @@
+
 package com.stockflow.service;
-import static org.mockito.ArgumentMatchers.any;
+
 import com.stockflow.dto.ProductCreateRequest;
 import com.stockflow.exception.ProductNotFoundException;
+import com.stockflow.model.Category;
 import com.stockflow.model.Product;
+import com.stockflow.repository.CategoryRepository;
 import com.stockflow.repository.ProductRepository;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.Optional;
-import static org.mockito.Mockito.never;
 
-import org.junit.jupiter.api.BeforeEach;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
-import org.mockito.ArgumentCaptor;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -28,35 +28,36 @@ class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private CategoryRepository categoryRepository;
+
     @InjectMocks
     private ProductService productService;
-    
 
     @Test
     void shouldReturnProductWhenIdExists() {
 
-        // Arrange
+        Category category = new Category("Aksesuar");
+
         Product mouse = new Product(
                 "Mouse",
                 new BigDecimal("750"),
                 20,
-                3
+                category
         );
 
         when(productRepository.findById(7))
                 .thenReturn(Optional.of(mouse));
 
-        // Act
         Product result = productService.getProductById(7);
 
-        // Assert
         assertEquals("Mouse", result.getName());
         assertEquals(new BigDecimal("750"), result.getPrice());
         assertEquals(20, result.getStockQuantity());
+        assertEquals("Aksesuar", result.getCategory().getName());
+
         verify(productRepository, times(1)).findById(7);
         verify(productRepository, never()).save(any(Product.class));
-
-
     }
 
     @Test
@@ -67,16 +68,15 @@ class ProductServiceTest {
 
         ProductNotFoundException exception = assertThrows(
                 ProductNotFoundException.class,
-                () -> productService.getProductById(99));
-
-                assertEquals("Product not found 99", exception.getMessage()
+                () -> productService.getProductById(99)
         );
+
+        assertEquals("Product not found 99", exception.getMessage());
     }
 
     @Test
     void shouldCreateProduct() {
 
-        // Arrange
         ProductCreateRequest request = new ProductCreateRequest(
                 "Keyboard",
                 new BigDecimal("1500"),
@@ -84,31 +84,31 @@ class ProductServiceTest {
                 3
         );
 
+        Category category = new Category("Aksesuar");
+
+        when(categoryRepository.findById(3))
+                .thenReturn(Optional.of(category));
+
         when(productRepository.save(any(Product.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Act
         Product result = productService.createProduct(request);
-
 
         assertEquals("Keyboard", result.getName());
         assertEquals(new BigDecimal("1500"), result.getPrice());
         assertEquals(10, result.getStockQuantity());
-        assertEquals(3, result.getCategoryId());
+        assertSame(category, result.getCategory());
 
         ArgumentCaptor<Product> productCaptor =
                 ArgumentCaptor.forClass(Product.class);
 
         verify(productRepository).save(productCaptor.capture());
+        verify(categoryRepository).findById(3);
 
         Product capturedProduct = productCaptor.getValue();
 
         assertEquals(new BigDecimal("1500"), capturedProduct.getPrice());
         assertEquals(10, capturedProduct.getStockQuantity());
-
-
-        }
-
-
-
+        assertSame(category, capturedProduct.getCategory());
+    }
 }

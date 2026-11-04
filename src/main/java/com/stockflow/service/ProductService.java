@@ -3,19 +3,27 @@ package com.stockflow.service;
 import com.stockflow.dto.ProductCreateRequest;
 import com.stockflow.exception.ProductNotFoundException;
 import com.stockflow.model.Product;
+import com.stockflow.repository.CategoryRepository;
 import com.stockflow.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
 import com.stockflow.dto.ProductUpdateRequest;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import com.stockflow.model.Category;
+import com.stockflow.exception.CategoryNotFoundException;
 
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(
+            ProductRepository productRepository,
+            CategoryRepository categoryRepository) {
+
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public List<Product> getAllProducts() {
@@ -30,12 +38,16 @@ public class ProductService {
     }
 
     public Product createProduct(ProductCreateRequest request) {
+
+        Category category = findCategory(request.categoryId());
+
         Product product = new Product(
                 request.name(),
                 request.price(),
                 request.stockQuantity(),
-                request.categoryId()
+                category
         );
+
         return productRepository.save(product);
     }
 
@@ -47,11 +59,13 @@ public class ProductService {
                         new ProductNotFoundException("Product not found " + id)
                 );
 
+        Category category = findCategory(request.categoryId());
+
         product.updateDetails(
                 request.name(),
                 request.price(),
                 request.stockQuantity(),
-                request.categoryId()
+                category
         );
 
         return product;
@@ -66,5 +80,19 @@ public class ProductService {
                 );
 
         productRepository.delete(product);
+    }
+
+    private Category findCategory(Integer categoryId) {
+
+        if (categoryId == null) {
+            return null;
+        }
+
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() ->
+                        new CategoryNotFoundException(
+                                "Category not found " + categoryId
+                        )
+                );
     }
 }

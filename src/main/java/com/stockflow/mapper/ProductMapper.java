@@ -1,3 +1,4 @@
+
 package com.stockflow.mapper;
 
 import com.stockflow.dto.ProductResponse;
@@ -7,14 +8,16 @@ public class ProductMapper {
 
     public static ProductResponse toResponse(Product product) {
 
-        ProductResponse response = new ProductResponse(
+        Integer categoryId = product.getCategory() != null
+                ? product.getCategory().getId()
+                : null;
+
+        return new ProductResponse(
                 product.getId(),
                 product.getName(),
                 product.getPrice(),
                 product.getStockQuantity(),
-                product.getCategoryId()
+                categoryId
         );
-
-        return response;
     }
 }

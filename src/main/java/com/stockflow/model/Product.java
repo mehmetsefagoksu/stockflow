@@ -1,12 +1,7 @@
+
 package com.stockflow.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
@@ -26,17 +21,23 @@ public class Product {
     @Column(name = "stock_quantity", nullable = false)
     private int stockQuantity;
 
-    @Column(name = "category_id")
-    private Integer categoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
+    protected Product() {
+    }
 
-    public Product(String name, BigDecimal price, int stockQuantity, Integer categoryId) {
+    public Product(String name, BigDecimal price,
+                   int stockQuantity, Category category) {
         this.name = name;
         this.price = price;
         this.stockQuantity = stockQuantity;
-        this.categoryId = categoryId;
+        this.category = category;
     }
-    protected Product() {
+
+    public Integer getId() {
+        return id;
     }
 
     public String getName() {
@@ -50,23 +51,19 @@ public class Product {
     public int getStockQuantity() {
         return stockQuantity;
     }
-    public Integer getId() {
-        return id;
-    }
-
-    public Integer getCategoryId() {
-        return categoryId;
+    public Category getCategory() {
+        return category;
     }
 
     public void updateDetails(
             String name,
             BigDecimal price,
             int stockQuantity,
-            Integer categoryId
-    ) {
+            Category category) {
+
         this.name = name;
         this.price = price;
         this.stockQuantity = stockQuantity;
-        this.categoryId = categoryId;
+        this.category = category;
     }
 }
