@@ -1,6 +1,7 @@
 
 package com.stockflow.model;
 
+import com.stockflow.exception.InsufficientStockException;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
@@ -55,15 +56,45 @@ public class Product {
         return category;
     }
 
+
     public void updateDetails(
             String name,
             BigDecimal price,
-            int stockQuantity,
             Category category) {
 
         this.name = name;
         this.price = price;
-        this.stockQuantity = stockQuantity;
         this.category = category;
     }
+
+
+
+    public void increaseStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException(
+                    "Quantity must be positive"
+            );
+        }
+
+        this.stockQuantity = Math.addExact(
+                this.stockQuantity, quantity
+        );
+    }
+
+    public void decreaseStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException(
+                    "Quantity must be positive"
+            );
+        }
+
+        if (this.stockQuantity < quantity) {
+            throw new InsufficientStockException(
+                    "Insufficient stock for product " + id
+            );
+        }
+
+        this.stockQuantity -= quantity;
+    }
+
 }

@@ -64,7 +64,6 @@ public class ProductService {
         product.updateDetails(
                 request.name(),
                 request.price(),
-                request.stockQuantity(),
                 category
         );
 
