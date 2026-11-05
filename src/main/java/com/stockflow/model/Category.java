@@ -28,4 +28,8 @@ public class Category {
     public String getName() {
         return name;
     }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
 }
