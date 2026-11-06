@@ -4,7 +4,6 @@ package com.stockflow.service;
 import com.stockflow.dto.StockMovementResponse;
 import com.stockflow.exception.ProductNotFoundException;
 import com.stockflow.model.Product;
-import com.stockflow.model.StockMovement;
 import com.stockflow.model.StockMovementType;
 import com.stockflow.repository.ProductRepository;
 import com.stockflow.repository.StockMovementRepository;
@@ -18,14 +17,20 @@ public class StockMovementService {
 
     private final ProductRepository productRepository;
     private final StockMovementRepository movementRepository;
+    private final StockAdjustmentService stockAdjustmentService;
+
 
     public StockMovementService(
             ProductRepository productRepository,
-            StockMovementRepository movementRepository) {
+            StockMovementRepository movementRepository,
+            StockAdjustmentService stockAdjustmentService) {
 
         this.productRepository = productRepository;
         this.movementRepository = movementRepository;
+        this.stockAdjustmentService = stockAdjustmentService;
     }
+
+
 
     @Transactional
     public Integer stockIn(
@@ -37,16 +42,12 @@ public class StockMovementService {
 
         Product product = findProductForUpdate(productId);
 
-        product.increaseStock(quantity);
-
-        StockMovement movement = new StockMovement(
+        stockAdjustmentService.adjust(
                 product,
                 StockMovementType.STOCK_IN,
                 quantity,
                 reason
         );
-
-        movementRepository.save(movement);
 
         return product.getStockQuantity();
     }
@@ -61,19 +62,16 @@ public class StockMovementService {
 
         Product product = findProductForUpdate(productId);
 
-        product.decreaseStock(quantity);
-
-        StockMovement movement = new StockMovement(
+        stockAdjustmentService.adjust(
                 product,
                 StockMovementType.STOCK_OUT,
                 quantity,
                 reason
         );
 
-        movementRepository.save(movement);
-
         return product.getStockQuantity();
     }
+
 
     private Product findProductForUpdate(Integer productId) {
         return productRepository.findByIdForUpdate(productId)

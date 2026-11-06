@@ -91,4 +91,29 @@ public class GlobalExceptionHandler {
                         exception.getMessage()
                 ));
     }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleOrderNotFound(
+            OrderNotFoundException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(
+                        404,
+                        exception.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(OrderAlreadyCancelledException.class)
+    public ResponseEntity<ErrorResponse> handleOrderAlreadyCancelled(
+            OrderAlreadyCancelledException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(
+                        409,
+                        exception.getMessage()
+                ));
+    }
+
 }
